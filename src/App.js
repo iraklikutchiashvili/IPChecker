@@ -3,44 +3,44 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import ResultBox from "./ResultBox";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import Stack from "@mui/material/Stack";
+import uuid from "react-uuid";
 
 function App() {
-  const testArr = [0, 1, 2, 3, 4];
+  const r =
+    /(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d{1})\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d{1})/g;
 
   const [inputVal, setInputVal] = useState("");
-  const [data, setData] = useState();
-  const [requestStatus, setRequestStatus] = useState(false);
+  const [data, setData] = useState([]);
+  const ip = inputVal.match(r);
 
   function handleInputChange(e) {
     setInputVal(e.target.value);
   }
 
-  const URL = `https://api.abuseipdb.com/api/v2/check?ipAddress=${inputVal}&key=0e1990b43da933a4504c54b8f764e627fe3a58535da2b3e8632454df211b704ba27dd4cfccc48d2b`;
-
   function retrieveIPInfo() {
-    axios
-      .get(URL)
-      .then(function (response) {
-        // handle success
-        setData(response.data.data);
-        setRequestStatus(true);
-        console.log(response.data.data);
-      })
-      .catch(function (error) {
-        // handle error
-        console.log(error);
-      })
-      .finally(function () {
-        // always executed
-      });
+    ip.forEach((element) => {
+      let URL = `https://api.abuseipdb.com/api/v2/check?ipAddress=${element}&key=0e1990b43da933a4504c54b8f764e627fe3a58535da2b3e8632454df211b704ba27dd4cfccc48d2b`;
+      axios
+        .get(URL)
+        .then(function (response) {
+          // handle success
+          setData((prev) => [...prev, response.data.data]);
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        })
+        .finally(function () {
+          // always executed
+        });
+    });
   }
-
   return (
     <div className="App">
-      <h1 className="App-header">Bulk IP address checker</h1>
+      <h1 className="App-header">Bulk IPv4 address checker</h1>
 
       <Box
         component="form"
@@ -70,17 +70,27 @@ function App() {
           onChange={handleInputChange}
           value={inputVal}
         />
-        <h2>{inputVal}</h2>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            width: "100%",
+          }}
+        >
+          <ul>{ip && ip.map((elem) => <li key={uuid()}>{elem}</li>)}</ul>
+        </Box>
       </Box>
 
-      {data && (
+      {data.length > 0 && (
         <Box>
-          <Stack spacing={12} direction="row">
+          <Stack spacing={14} direction="row">
             <h1>IP Address</h1>
             <h1>Abuse Score</h1>
             <h1>Domain</h1>
           </Stack>
-          <ResultBox data={data} />
+          {data.map((elem) => (
+            <ResultBox key={uuid()} data={elem} />
+          ))}
         </Box>
       )}
     </div>
