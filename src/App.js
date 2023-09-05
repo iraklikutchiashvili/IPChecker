@@ -21,26 +21,28 @@ function App() {
   }
 
   function retrieveIPInfo() {
-    ip.forEach((element) => {
-      let URL = `https://api.abuseipdb.com/api/v2/check?ipAddress=${element}&key=0e1990b43da933a4504c54b8f764e627fe3a58535da2b3e8632454df211b704ba27dd4cfccc48d2b`;
-      axios
-        .get(URL)
-        .then(function (response) {
-          // handle success
-          setData((prev) => [...prev, response.data.data]);
-        })
-        .catch(function (error) {
-          // handle error
-          console.log(error);
-        })
-        .finally(function () {
-          // always executed
-        });
-    });
+    data.length > 0 && setData([]);
+    inputVal.length > 0 &&
+      ip.forEach((element) => {
+        let URL = `https://api.abuseipdb.com/api/v2/check?ipAddress=${element}&key=0e1990b43da933a4504c54b8f764e627fe3a58535da2b3e8632454df211b704ba27dd4cfccc48d2b`;
+        axios
+          .get(URL)
+          .then(function (response) {
+            // handle success
+            setData((prev) => [...prev, response.data.data]);
+          })
+          .catch(function (error) {
+            // handle error
+            console.log(error);
+          })
+          .finally(function () {
+            // always executed
+          });
+      });
   }
   return (
     <div className="App">
-      <h1 className="App-header">Bulk IPv4 address checker</h1>
+      <h1 className="App-header">Multiple IPv4 address checker</h1>
 
       <Box
         component="form"
@@ -77,7 +79,16 @@ function App() {
             width: "100%",
           }}
         >
-          <ul>{ip && ip.map((elem) => <li key={uuid()}>{elem}</li>)}</ul>
+          {ip && (
+            <>
+              <h3>Checking IPs:</h3>
+              <ul>
+                {ip.map((elem) => (
+                  <li key={uuid()}>{elem}</li>
+                ))}
+              </ul>
+            </>
+          )}
         </Box>
       </Box>
 
